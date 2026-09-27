@@ -5,9 +5,13 @@
     "@DawidBochno"
   ],
   "config_flow": true,
+  "dependencies": [
+    "http",
+    "frontend"
+  ],
   "documentation": "https://github.com/DawidBochno/ha-inpost-app",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/DawidBochno/ha-inpost-app/issues",
   "requirements": [],
-  "version": "0.1.1"
+  "version": "0.2.0"
 }

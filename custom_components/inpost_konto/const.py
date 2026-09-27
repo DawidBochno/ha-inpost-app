@@ -2,6 +2,11 @@
 from __future__ import annotations
 
 DOMAIN = "inpost_konto"
+VERSION = "0.2.0"  # trzymaj zgodnie z manifest.json — leci do URL-a karty jako cache-buster
+
+# Własna karta Lovelace serwowana przez integrację: dzięki niej karta jest do
+# wybrania z listy „Dodaj kartę", bez wklejania YAML-a i bez dodawania zasobu ręcznie.
+CARD_URL = "/inpost_konto/inpost-card.js"
 PLATFORMS = ["sensor"]  # string, zeby const.py dal sie zaimportowac bez HA (testy)
 ATTRIBUTION = "Dane z konta InPost Mobile"
 

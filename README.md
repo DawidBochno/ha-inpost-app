@@ -79,14 +79,31 @@ nich, nie do surowych stringów InPostu (tych jest ~60 i dochodzą nowe).
 
 ## Karta na panelu
 
-**Najszybciej:** wejdź na urządzenie (Ustawienia → Urządzenia i usługi → InPost App → InPost)
-i kliknij **„Dodaj do panelu"**. Home Assistant sam wstawi kartę ze wszystkimi encjami. Jedno
-kliknięcie, zero konfiguracji — ale karta jest surowa: lista encji i liczby, bez paczkomatu
-i terminu odbioru.
+Integracja wozi własną kartę Lovelace, więc **nic nie trzeba wklejać ani rejestrować**:
 
-**Ładniej:** Edytuj panel → Dodaj kartę → **Ręcznie** → wklej poniższe. Same karty wbudowane,
-żadnych dodatków z HACS. Lista paczek rozwija się sama — jedna paczka czy dziesięć, bez zmian
-w konfiguracji.
+1. Otwórz panel → Edytuj → **Dodaj kartę**.
+2. Wpisz „InPost" w wyszukiwarce kart — pozycja **„InPost — paczki"** ma podgląd na żywo.
+3. Dodaj. Karta sama znajduje właściwą encję, więc działa od razu, bez konfiguracji.
+
+Pokazuje cztery liczniki (do odbioru / w drodze / wszystkie / problemy), a pod nimi listę
+paczek: nadawca, status, paczkomat z adresem i odliczanie do terminu odbioru. Wiersze
+odebranych paczek są przygaszone.
+
+Opcjonalnie:
+
+```yaml
+type: custom:inpost-card
+entity: sensor.inpost_paczki
+title: Paczki
+```
+
+### Alternatywy
+
+- **Karta surowa, jednym kliknięciem:** Ustawienia → Urządzenia i usługi → InPost App →
+  urządzenie → **„Dodaj do panelu"**. HA pyta, na który panel i zakładkę, i sam wstawia kartę
+  ze wszystkimi encjami. Bez paczkomatu i terminu — to zwykła lista encji.
+- **Same karty wbudowane** (gdybyś nie chciał własnej karty — np. na panelu w trybie
+  ścisłego YAML-a):
 
 ```yaml
 type: vertical-stack
@@ -108,29 +125,18 @@ cards:
 
       {% if not paczki %}Brak paczek.{% endif %}
 
-      {% for p in paczki %}{% set etykieta = {'do_odbioru':'do odbioru',
-      'w_drodze':'w drodze','w_dostawie':'dziś u Ciebie','odebrana':'odebrana',
-      'problem':'problem','zwrot':'zwrot','zarejestrowana':'zarejestrowana'}
-      .get(p.status, p.status) %}
+      {% for p in paczki %}
 
-      **{{ p.nadawca or 'Nieznany nadawca' }}** — {{ etykieta }}
+      **{{ p.nadawca or 'Nieznany nadawca' }}** — {{ p.status }}
 
       {% if p.punkt %}- {{ p.punkt }}, {{ p.adres }}
-
-      {% endif %}{% if p.termin_odbioru %}- odbierz do {{
-      as_datetime(p.termin_odbioru) | as_local | as_timestamp |
-      timestamp_custom('%a %d.%m, %H:%M') }} ({{
-      relative_time(as_datetime(p.termin_odbioru)) }})
 
       {% endif %}{% endfor %}
 ```
 
-Podstaw swoje `entity_id`, jeśli Twoje encje nazywają się inaczej (nazwa bierze się z nazwy
-urządzenia — sprawdzisz ją w Narzędziach deweloperskich → Stany, filtr `inpost`).
-
-Karta czyta atrybut `paczki` z licznika — ten sam atrybut mają wszystkie cztery liczniki, więc
-nie potrzebuje encji poszczególnych paczek. Te przydają się osobno, w automatyzacjach i na
-kartach pojedynczej przesyłki (mają m.in. zdjęcie paczkomatu i pełną historię zdarzeń).
+Wszystkie warianty czytają atrybut `paczki` z licznika — ten sam mają wszystkie cztery
+liczniki. Encje pojedynczych paczek przydają się osobno: w automatyzacjach i na kartach
+jednej przesyłki (mają m.in. zdjęcie paczkomatu i pełną historię zdarzeń).
 
 ## Przykład automatyzacji
 
@@ -170,7 +176,9 @@ automation:
 
 ```bash
 python tests/test_parcels.py
+node tests/test_card.cjs
 ```
 
-Sprawdza mapowanie statusów, normalizację paczki i sprzątanie odebranych — czyli jedyną
-część, która może się zepsuć po cichu. Nie wymaga ani HA, ani pytesta.
+Pierwszy sprawdza mapowanie statusów, normalizację paczki i sprzątanie odebranych; drugi —
+odliczanie do terminu odbioru i kubełki liczników w karcie. Czyli te części, które mogą się
+zepsuć po cichu. Ani HA, ani pytesta, ani przeglądarki.
