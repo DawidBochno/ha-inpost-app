@@ -50,6 +50,8 @@ class InPostCoordinator(DataUpdateCoordinator[InPostData]):
                 minutes=options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
             ),
         )
+        # Ostatnia surowa odpowiedz — tylko do diagnostyki (patrz diagnostics.py).
+        self.raw_tracked: Any = None
         self.api = InPostApi(
             session=async_get_clientsession(hass),
             device_uid=entry.data["device_uid"],
@@ -74,6 +76,7 @@ class InPostCoordinator(DataUpdateCoordinator[InPostData]):
         except InPostError as err:
             raise UpdateFailed(str(err)) from err
 
+        self.raw_tracked = tracked
         parcels = normalize_all(
             tracked, show_codes=options.get(CONF_SHOW_CODES, DEFAULT_SHOW_CODES)
         )

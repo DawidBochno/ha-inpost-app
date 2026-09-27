@@ -1,4 +1,6 @@
-# InPost Konto — integracja Home Assistant
+# InPost App — integracja Home Assistant
+
+<img src="brands/icon.png" width="96" align="right" alt="">
 
 Wyciąga z konta **InPost Mobile** to, co widzi aplikacja: paczki przychodzące, ich statusy,
 paczkomat/punkt odbioru, termin odbioru, kod otwarcia skrytki (opcjonalnie) i powiadomienia
@@ -22,9 +24,9 @@ padają co kilka dni.
 
 1. HACS → ⋮ (prawy górny róg) → **Custom repositories**.
 2. Wklej `https://github.com/DawidBochno/ha-inpost-app`, kategoria **Integration** → Add.
-3. Znajdź „InPost Konto" na liście HACS → Download.
+3. Znajdź „InPost App" na liście HACS → Download.
 4. Zrestartuj Home Assistanta.
-5. **Ustawienia → Urządzenia i usługi → Dodaj integrację → „InPost Konto"**.
+5. **Ustawienia → Urządzenia i usługi → Dodaj integrację → „InPost App"**.
 
 [![Otwórz w HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=DawidBochno&repository=ha-inpost-app&category=integration)
 
@@ -34,8 +36,8 @@ padają co kilka dni.
    (Studio Code Server, Samba albo `scp` na `core_ssh`).
 2. Zrestartuj Home Assistanta, potem jak w punkcie 5 powyżej.
 
-> Uwagi o nazwach: repo nazywa się `ha-inpost-app`, integracja w HACS i w HA — **InPost Konto**,
-> a domena (prefiks encji) to `inpost_konto`. Nazwę repo można zmienić w każdej chwili,
+> Uwagi o nazwach: repo, integracja w HACS i wpis w HA nazywają się **InPost App**,
+> ale domena (katalog integracji) to `inpost_konto`. Nazwę repo można zmienić w każdej chwili,
 > domeny nie — siedzi w nazwach encji i w zapisanym wpisie konfiguracji.
 
 ## Logowanie

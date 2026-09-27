@@ -1,4 +1,4 @@
-"""Integracja InPost Konto — paczki z konta InPost Mobile w Home Assistant."""
+"""Integracja InPost App — paczki z konta InPost Mobile w Home Assistant."""
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry

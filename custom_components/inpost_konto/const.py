@@ -1,4 +1,4 @@
-"""Stałe integracji InPost Konto."""
+"""Stałe integracji InPost App."""
 from __future__ import annotations
 
 DOMAIN = "inpost_konto"
