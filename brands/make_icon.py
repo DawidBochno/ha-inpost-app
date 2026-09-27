@@ -30,11 +30,12 @@ def build() -> Image.Image:
     img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
-    m = SIZE * 0.055
-    _rr(draw, (m, m, SIZE - m, SIZE - m), SIZE * 0.20, AMBER)
+    # Bez przezroczystego marginesu: walidacja home-assistant/brands wymaga
+    # obrazka przycietego do tresci. Zaokraglone rogi to jedyna przezroczystosc.
+    _rr(draw, (0, 0, SIZE, SIZE), SIZE * 0.22, AMBER)
 
     # Siatka skrytek: lewa kolumna wezsza (3 male), prawa szersza (2 duze).
-    pad = SIZE * 0.155
+    pad = SIZE * 0.175
     gap = SIZE * 0.035
     left, top, right, bottom = pad, pad, SIZE - pad, SIZE - pad
     split = left + (right - left) * 0.42
