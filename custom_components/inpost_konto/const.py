@@ -37,7 +37,7 @@ DEFAULT_SCAN_INTERVAL = 5           # minut; paczka rusza się kilka razy dzienn
 # Kod odbioru otwiera skrytkę, więc domyślnie go nie publikujemy — stany i
 # atrybuty lądują w bazie recordera i we wszystkim, co ją czyta.
 DEFAULT_SHOW_CODES = False
-DEFAULT_KEEP_DELIVERED_DAYS = 3
+DEFAULT_KEEP_DELIVERED_DAYS = 7
 
 # Ile ostatnich zdarzeń trzymać w atrybucie (limit atrybutu stanu w HA ~16 kB).
 MAX_EVENTS = 15

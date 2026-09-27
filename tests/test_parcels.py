@@ -40,44 +40,80 @@ def test_map_status() -> None:
 
 
 def test_normalize() -> None:
+    """Ksztalt wzorowany na prawdziwej odpowiedzi /v4/parcels/tracked.
+
+    Wazne szczegoly z zywego konta: statusy sa WIELKIMI literami, zdarzenia
+    przychodza w dwoch listach naraz (bogata `events`, uboga `eventLog`),
+    a `type` punktu to lista.
+    """
     payload = {
+        "updatedUntil": "2026-09-27T10:40:54.767Z",
+        "more": False,
         "parcels": [
             {
-                "shipmentNumber": "123",
-                "status": "ready_to_pickup",
+                "shipmentNumber": "653999410005825208459870",
+                "shipmentType": "parcel",
+                "status": "READY_TO_PICKUP",
                 "statusGroup": "TO_PICKUP",
-                "sender": {"name": "Allegro"},
+                "sender": "Allegro",
                 "expiryDate": "2026-09-29T20:00:00.000Z",
                 "openCode": "123456",
-                "parcelSize": "A",
+                "parcelSize": "B",
                 "pickUpPoint": {
-                    "name": "KRA01A",
+                    "name": "GRM02A",
+                    "location": {"latitude": 52.10274, "longitude": 20.61853},
+                    "locationDescription": "Przy sklepie Carrefour",
+                    "openingHours": "24/7",
+                    "location247": True,
+                    "easyAccessZone": True,
+                    "imageUrl": "https://static.easypack24.net/points/pl/images/GRM02A.jpg",
+                    "type": ["parcel_locker"],
                     "addressDetails": {
-                        "street": "Długa",
-                        "buildingNumber": "1",
-                        "postCode": "30-001",
-                        "city": "Kraków",
+                        "street": "Żyrardowska",
+                        "buildingNumber": "50",
+                        "postCode": "05-825",
+                        "city": "Grodzisk Mazowiecki",
                     },
-                    "location": {"latitude": 50.06, "longitude": 19.94},
                 },
+                "events": [
+                    {
+                        "date": "2026-09-03T09:04:27.610Z",
+                        "eventTitle": "Gotowa do odbioru",
+                        "eventCode": "LMD.1005",
+                    },
+                    {
+                        "date": "2026-09-03T06:49:02.076Z",
+                        "eventTitle": "Wydana do doręczenia",
+                        "eventCode": "LMD.1001",
+                    },
+                ],
                 "eventLog": [
-                    {"type": "ready_to_pickup", "date": "2026-09-27T08:00:00.000Z"},
-                    {"type": "out_for_delivery", "date": "2026-09-26T08:00:00.000Z"},
+                    {"type": "PARCEL_STATUS", "name": "READY_TO_PICKUP", "date": "2026-09-03T09:04:27.610Z"},
                 ],
             },
-            {"status": "delivered"},  # bez numeru — do wyrzucenia
-        ]
+            {"status": "DELIVERED"},  # bez numeru — do wyrzucenia
+        ],
     }
     parcels = normalize_all(payload, show_codes=False)
     assert len(parcels) == 1, "paczka bez numeru nie ma prawa zrobic encji"
     parcel = parcels[0]
-    assert parcel["status"] == ST_READY
-    assert parcel["nadawca"] == "Allegro"
-    assert parcel["adres"] == "Długa 1 30-001 Kraków"
-    assert parcel["latitude"] == 50.06
+    assert parcel["status"] == ST_READY, "status z API jest CAPSem"
+    assert parcel["nadawca"] == "Allegro", "nadawca bywa golym stringiem, nie slownikiem"
+    assert parcel["adres"] == "Żyrardowska 50 05-825 Grodzisk Mazowiecki"
+    assert parcel["latitude"] == 52.10274
+    assert parcel["typ_punktu"] == "parcel_locker", "lista typow ma byc splaszczona"
+    assert parcel["zdjecie_punktu"].endswith("GRM02A.jpg")
     assert "kod_odbioru" not in parcel, "kod otwiera skrytke — domyslnie ukryty"
-    assert parcel["zdarzenia"][0]["kiedy"].startswith("2026-09-27"), "najnowsze pierwsze"
+    # Regres: czytalem `type` z eventLog, wiec kazde zdarzenie bylo "PARCEL_STATUS".
+    assert parcel["zdarzenia"][0]["opis"] == "Gotowa do odbioru"
+    assert parcel["zdarzenia"][0]["kod"] == "LMD.1005"
     assert normalize_all(payload, show_codes=True)[0]["kod_odbioru"] == "123456"
+    # Zapas, gdy API przysle tylko uboga liste.
+    only_log = normalize_all(
+        {"parcels": [{"shipmentNumber": "x", "eventLog": [{"type": "PARCEL_STATUS", "name": "DELIVERED", "date": "2026-09-01T10:00:00Z"}]}]},
+        show_codes=False,
+    )
+    assert only_log[0]["zdarzenia"][0]["opis"] == "DELIVERED"
     # Sortowanie: paczka z terminem przed paczka bez terminu.
     mixed = normalize_all(
         {"parcels": [{"shipmentNumber": "b"}, {"shipmentNumber": "a", "expiryDate": "2026-09-28T10:00:00Z"}]},

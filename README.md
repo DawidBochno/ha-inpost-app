@@ -62,7 +62,7 @@ Encje na urządzeniu „InPost +48…":
 | `sensor.*_problemy` | ile z problemem/zwrotem | jak wyżej |
 | `sensor.*_najblizszy_termin_odbioru` | timestamp | — |
 | `sensor.*_ostatnie_powiadomienie` | treść | `powiadomienia` (ostatnie 20) |
-| `sensor.*_paczka_<numer>` | status paczki | nadawca, paczkomat + adres + współrzędne, godziny otwarcia, rozmiar, terminy, historia zdarzeń, link do śledzenia, kod odbioru (opcjonalnie) |
+| `sensor.*_paczka_<numer>` | status paczki | nadawca, paczkomat + adres + współrzędne, zdjęcie paczkomatu, godziny otwarcia / 24-7, strefa łatwego dostępu, rozmiar, terminy, historia zdarzeń (z opisami InPostu i kodami typu `LMD.1005`), link do śledzenia, kod odbioru (opcjonalnie) |
 
 Statusy są mapowane na 8 kubełków: `zarejestrowana`, `w_drodze`, `w_dostawie`,
 `do_odbioru`, `odebrana`, `zwrot`, `problem`, `nieznany` — w automatyzacjach porównuj do
@@ -73,8 +73,9 @@ nich, nie do surowych stringów InPostu (tych jest ~60 i dochodzą nowe).
 - **Częstotliwość odpytywania** — domyślnie 5 min.
 - **Publikuj kody otwarcia skrytki** — domyślnie **wyłączone**. Kod otwiera skrytkę, a stany
   encji lądują w bazie recordera i we wszystkim, co ją czyta.
-- **Ile dni trzymać odebrane paczki** — domyślnie 3, `0` = usuwaj od razu. Bez tego lista
-  rośnie bez końca.
+- **Ile dni trzymać odebrane paczki** — domyślnie 7, `0` = usuwaj od razu. Bez tego lista
+  rośnie bez końca. Uwaga: jeśli wszystkie Twoje paczki są odebrane i starsze niż ten próg,
+  **wszystkie liczniki pokażą 0** — to nie awaria, tylko pusta skrzynka.
 
 ## Przykład automatyzacji
 

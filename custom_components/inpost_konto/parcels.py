@@ -65,6 +65,7 @@ def _pickup_point(raw: Any) -> dict[str, Any]:
     if not isinstance(raw, dict):
         return {}
     location = raw.get("location") if isinstance(raw.get("location"), dict) else {}
+    kind = raw.get("type")
     address = raw.get("addressDetails") if isinstance(raw.get("addressDetails"), dict) else {}
     parts = [
         address.get("street"),
@@ -76,34 +77,52 @@ def _pickup_point(raw: Any) -> dict[str, Any]:
         "punkt": raw.get("name"),
         "adres": " ".join(str(p) for p in parts if p) or raw.get("locationDescription"),
         "opis_lokalizacji": raw.get("locationDescription"),
-        "typ_punktu": raw.get("type"),
+        "typ_punktu": ", ".join(kind) if isinstance(kind, list) else kind,
         "godziny_otwarcia": raw.get("openingHours"),
+        "calodobowy": raw.get("location247"),
+        "strefa_latwego_dostepu": raw.get("easyAccessZone"),
+        "zdjecie_punktu": raw.get("imageUrl"),
         "latitude": location.get("latitude"),
         "longitude": location.get("longitude"),
     }
 
 
-def _events(raw: Any) -> list[dict[str, Any]]:
-    """Ostatnie MAX_EVENTS zdarzen, najnowsze pierwsze."""
-    if not isinstance(raw, list):
+def _events(raw_events: Any, raw_log: Any) -> list[dict[str, Any]]:
+    """Ostatnie MAX_EVENTS zdarzen, najnowsze pierwsze.
+
+    API zwraca dwie listy naraz: bogata ``events`` (ludzki tytul + kod typu
+    ``EOL.1001``) i uboga ``eventLog`` (``{type: "PARCEL_STATUS", name: "DELIVERED"}``).
+    Bierzemy bogata, uboga jest zapasem — w niej opis siedzi w ``name``,
+    a ``type`` dla kazdego zdarzenia to ta sama stala i nie niesie nic.
+    """
+    if isinstance(raw_events, list) and raw_events:
+        items = [
+            {"kiedy": e.get("date"), "opis": e.get("eventTitle"), "kod": e.get("eventCode")}
+            for e in raw_events
+            if isinstance(e, dict)
+        ]
+    elif isinstance(raw_log, list):
+        items = [
+            {"kiedy": e.get("date"), "opis": e.get("name"), "kod": None}
+            for e in raw_log
+            if isinstance(e, dict)
+        ]
+    else:
         return []
-    events = [
-        {
-            "status": map_status(e.get("type") or e.get("name") or e.get("status"), None),
-            "status_api": e.get("type") or e.get("name") or e.get("status"),
-            "kiedy": e.get("date") or e.get("time"),
-        }
-        for e in raw
-        if isinstance(e, dict)
-    ]
-    events.sort(key=lambda e: str(e.get("kiedy") or ""), reverse=True)
-    return events[:MAX_EVENTS]
+    items.sort(key=lambda e: str(e.get("kiedy") or ""), reverse=True)
+    return items[:MAX_EVENTS]
+
+
+def _text(value: Any) -> str | None:
+    """Nadawca/odbiorca bywa slownikiem, bywa golym stringiem."""
+    if isinstance(value, dict):
+        return value.get("name") or value.get("companyName") or None
+    return str(value) if value else None
 
 
 def normalize_parcel(raw: dict[str, Any], *, show_codes: bool) -> dict[str, Any]:
     """Jedna paczka z API -> plaski slownik, z ktorego zyje encja."""
     number = str(raw.get("shipmentNumber") or raw.get("number") or "")
-    sender = raw.get("sender") if isinstance(raw.get("sender"), dict) else {}
     multi = raw.get("multiCompartment") if isinstance(raw.get("multiCompartment"), dict) else {}
 
     parcel: dict[str, Any] = {
@@ -111,7 +130,7 @@ def normalize_parcel(raw: dict[str, Any], *, show_codes: bool) -> dict[str, Any]
         "status": map_status(raw.get("status"), raw.get("statusGroup")),
         "status_api": raw.get("status"),
         "grupa_statusu": raw.get("statusGroup"),
-        "nadawca": sender.get("name") or raw.get("senderName"),
+        "nadawca": _text(raw.get("sender")) or _text(raw.get("senderName")),
         "rozmiar": raw.get("parcelSize"),
         "typ_przesylki": raw.get("shipmentType"),
         "data_nadania": raw.get("storedDate"),
@@ -120,7 +139,7 @@ def normalize_parcel(raw: dict[str, Any], *, show_codes: bool) -> dict[str, Any]
         "zwrot_do_nadawcy": raw.get("returnedToSenderDate"),
         "wielo_skrytka": bool(multi.get("uuid")),
         "url": TRACKING_URL.format(number=number) if number else None,
-        "zdarzenia": _events(raw.get("eventLog")),
+        "zdarzenia": _events(raw.get("events"), raw.get("eventLog")),
         **_pickup_point(raw.get("pickUpPoint")),
     }
     if show_codes:
@@ -133,6 +152,12 @@ def normalize_all(payload: Any, *, show_codes: bool) -> list[dict[str, Any]]:
     """Cala odpowiedz /parcels/tracked -> lista znormalizowanych paczek."""
     if isinstance(payload, dict):
         raw_list = payload.get("parcels") or payload.get("items") or []
+        if payload.get("more"):
+            # ponytail: bez stronicowania. Doloz `updatedUntil` do zapytania,
+            # jesli komus faktycznie urwie liste paczek.
+            _LOGGER.warning(
+                "InPost zwrocil `more: true` — lista paczek moze byc niepelna. Zglos to."
+            )
     else:
         raw_list = payload if isinstance(payload, list) else []
     parcels = [
