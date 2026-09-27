@@ -77,6 +77,61 @@ nich, nie do surowych stringów InPostu (tych jest ~60 i dochodzą nowe).
   rośnie bez końca. Uwaga: jeśli wszystkie Twoje paczki są odebrane i starsze niż ten próg,
   **wszystkie liczniki pokażą 0** — to nie awaria, tylko pusta skrzynka.
 
+## Karta na panelu
+
+**Najszybciej:** wejdź na urządzenie (Ustawienia → Urządzenia i usługi → InPost App → InPost)
+i kliknij **„Dodaj do panelu"**. Home Assistant sam wstawi kartę ze wszystkimi encjami. Jedno
+kliknięcie, zero konfiguracji — ale karta jest surowa: lista encji i liczby, bez paczkomatu
+i terminu odbioru.
+
+**Ładniej:** Edytuj panel → Dodaj kartę → **Ręcznie** → wklej poniższe. Same karty wbudowane,
+żadnych dodatków z HACS. Lista paczek rozwija się sama — jedna paczka czy dziesięć, bez zmian
+w konfiguracji.
+
+```yaml
+type: vertical-stack
+cards:
+  - type: glance
+    title: InPost
+    entities:
+      - entity: sensor.inpost_do_odbioru
+        name: Do odbioru
+      - entity: sensor.inpost_w_drodze
+        name: W drodze
+      - entity: sensor.inpost_paczki
+        name: Wszystkie
+      - entity: sensor.inpost_problemy
+        name: Problemy
+  - type: markdown
+    content: >-
+      {% set paczki = state_attr('sensor.inpost_paczki','paczki') or [] %}
+
+      {% if not paczki %}Brak paczek.{% endif %}
+
+      {% for p in paczki %}{% set etykieta = {'do_odbioru':'do odbioru',
+      'w_drodze':'w drodze','w_dostawie':'dziś u Ciebie','odebrana':'odebrana',
+      'problem':'problem','zwrot':'zwrot','zarejestrowana':'zarejestrowana'}
+      .get(p.status, p.status) %}
+
+      **{{ p.nadawca or 'Nieznany nadawca' }}** — {{ etykieta }}
+
+      {% if p.punkt %}- {{ p.punkt }}, {{ p.adres }}
+
+      {% endif %}{% if p.termin_odbioru %}- odbierz do {{
+      as_datetime(p.termin_odbioru) | as_local | as_timestamp |
+      timestamp_custom('%a %d.%m, %H:%M') }} ({{
+      relative_time(as_datetime(p.termin_odbioru)) }})
+
+      {% endif %}{% endfor %}
+```
+
+Podstaw swoje `entity_id`, jeśli Twoje encje nazywają się inaczej (nazwa bierze się z nazwy
+urządzenia — sprawdzisz ją w Narzędziach deweloperskich → Stany, filtr `inpost`).
+
+Karta czyta atrybut `paczki` z licznika — ten sam atrybut mają wszystkie cztery liczniki, więc
+nie potrzebuje encji poszczególnych paczek. Te przydają się osobno, w automatyzacjach i na
+kartach pojedynczej przesyłki (mają m.in. zdjęcie paczkomatu i pełną historię zdarzeń).
+
 ## Przykład automatyzacji
 
 Podstaw swój numer — encje nazywają się od numeru konta (`sensor.inpost_48<numer>_*`).
