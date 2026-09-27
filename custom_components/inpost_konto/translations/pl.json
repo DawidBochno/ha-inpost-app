@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Logowanie do konta InPost",
+        "description": "1. Otwórz [ten link]({login_url}) w przeglądarce i zaloguj się tak jak w aplikacji InPost Mobile (numer telefonu, kod SMS, captcha).\n2. Po zalogowaniu przeglądarka wyląduje na stronie `account.inpost-group.com/callback?code=...` — może wyglądać na pustą lub błędną, to normalne.\n3. Skopiuj **cały adres z paska przeglądarki** i wklej go poniżej.\n\nLink jest jednorazowy: przy kolejnej próbie użyj nowego linku z tego okna.",
+        "data": {
+          "callback_url": "Adres zwrotny (albo sam kod)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Zaloguj się ponownie do InPost",
+        "description": "Sesja wygasła lub została unieważniona (np. wylogowanie w aplikacji). Zaloguj się ponownie: otwórz [ten link]({login_url}), zaloguj się i wklej poniżej adres, na którym wyląduje przeglądarka.",
+        "data": {
+          "callback_url": "Adres zwrotny (albo sam kod)"
+        }
+      }
+    },
+    "error": {
+      "invalid_callback": "Nie znalazłem kodu w tym adresie (albo pochodzi on z innej próby logowania). Użyj linku z tego okna i wklej cały adres.",
+      "invalid_auth": "InPost odrzucił ten kod. Kod jest jednorazowy i szybko wygasa — zaloguj się jeszcze raz przez nowy link.",
+      "cannot_connect": "Brak połączenia z API InPostu. Spróbuj ponownie za chwilę."
+    },
+    "abort": {
+      "already_configured": "To konto InPost jest już dodane.",
+      "wrong_account": "To inne konto InPost niż to, które próbujesz naprawić. Zaloguj się na ten sam numer telefonu.",
+      "reauth_successful": "Połączenie z kontem InPost odtworzone."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ustawienia InPost",
+        "data": {
+          "scan_interval": "Częstotliwość odpytywania (minuty)",
+          "show_codes": "Publikuj kody otwarcia skrytki",
+          "keep_delivered_days": "Ile dni trzymać odebrane paczki (0 = usuwaj od razu)"
+        },
+        "data_description": {
+          "show_codes": "Kod otwiera skrytkę. Włączony trafia do stanów encji i do bazy recordera — włączaj tylko świadomie."
+        }
+      }
+    }
+  }
+}

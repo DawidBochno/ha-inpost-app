@@ -1,0 +1,13 @@
+{
+  "domain": "inpost_konto",
+  "name": "InPost Konto",
+  "codeowners": [
+    "@DawidBochno"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/DawidBochno/ha-inpost-app",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/DawidBochno/ha-inpost-app/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
