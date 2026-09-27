@@ -79,6 +79,10 @@ nich, nie do surowych stringów InPostu (tych jest ~60 i dochodzą nowe).
 
 ## Karta na panelu
 
+<img src="docs/karta.svg" width="560" alt="Karta InPost: liczniki paczek i lista przesylek z paczkomatem i terminem odbioru">
+
+<sup>Podglad karty na przykladowych danych — konto z paczka czekajaca w paczkomacie.</sup>
+
 Integracja wozi własną kartę Lovelace, więc **nic nie trzeba wklejać ani rejestrować**:
 
 1. Otwórz panel → Edytuj → **Dodaj kartę**.
