@@ -5,8 +5,11 @@ jednym parametrem. Motyw: skrytki paczkomatu, jedna otwarta (ta z Twoja paczka).
 Swiadomie NIE jest to logo InPostu — to wlasny rysunek, zeby nie podszywac sie
 pod ich znak towarowy.
 
-Wymaga tylko Pillow. Efekt: icon.png (256) i icon@2x.png (512) — dokladnie te
-rozmiary i nazwy, ktorych oczekuje repozytorium home-assistant/brands.
+Wymaga tylko Pillow. Efekt: icon.png (256) i icon@2x.png (512) zapisane do
+`custom_components/inpost_konto/brand/` — od HA 2026.3.0 integracje
+niestandardowe wozza wlasne ikony ze soba i te maja pierwszenstwo przed CDN-em.
+PR-y z ikonami custom integrations do home-assistant/brands sa od tej wersji
+zamykane automatycznie.
 """
 from __future__ import annotations
 
@@ -19,7 +22,7 @@ AMBER = (245, 197, 24, 255)      # Tlo kafelka; czytelne i na jasnym, i na ciemn
 GRAPHITE = (27, 31, 39, 255)     # Zamkniete skrytki.
 OPEN = (255, 252, 245, 255)      # Skrytka otwarta — ta jedna, na ktorej Ci zalezy.
 
-OUT = Path(__file__).parent
+OUT = Path(__file__).parent  # HA czyta ikone dokladnie stad.
 
 
 def _rr(draw: ImageDraw.ImageDraw, box: tuple[float, float, float, float], r: float, fill) -> None:

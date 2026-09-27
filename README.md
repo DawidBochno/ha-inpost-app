@@ -1,6 +1,6 @@
 # InPost App — integracja Home Assistant
 
-<img src="brands/icon.png" width="96" align="right" alt="">
+<img src="custom_components/inpost_konto/brand/icon.png" width="96" align="right" alt="">
 
 Wyciąga z konta **InPost Mobile** to, co widzi aplikacja: paczki przychodzące, ich statusy,
 paczkomat/punkt odbioru, termin odbioru, kod otwarcia skrytki (opcjonalnie) i powiadomienia
