@@ -1,0 +1,38 @@
+name: Walidacja
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # API InPostu i wymagania HACS-a zmieniają się bez naszego udziału —
+    # cotygodniowy przebieg wyłapie to, zanim zgłosi to użytkownik.
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+jobs:
+  hacs:
+    name: HACS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: integration
+
+  hassfest:
+    name: hassfest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  testy:
+    name: Testy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python tests/test_parcels.py
+      - run: node tests/test_card.cjs
