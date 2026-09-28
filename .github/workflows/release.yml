@@ -1,0 +1,39 @@
+name: Wydanie
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    name: Spakuj i dołącz do wydania
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Tag i wersja w manifeście muszą się zgadzać. HACS pokazuje wersję
+      # z manifestu, a pobiera po tagu — rozjazd daje "zaktualizowano",
+      # po którym użytkownik dalej widzi starą wersję.
+      - name: Sprawdź zgodność wersji z tagiem
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MANIFEST=$(jq -r .version custom_components/inpost_konto/manifest.json)
+          if [ "$TAG" != "$MANIFEST" ]; then
+            echo "Tag $GITHUB_REF_NAME nie zgadza się z manifest.json ($MANIFEST)" >&2
+            exit 1
+          fi
+
+      # ZIP musi zawierac pliki integracji w swoim korzeniu — HACS rozpakowuje
+      # go prosto do custom_components/inpost_konto/.
+      - name: Spakuj integrację
+        run: |
+          cd custom_components/inpost_konto
+          zip -r inpost_konto.zip . -x '*__pycache__*' '*.pyc'
+
+      - name: Dołącz ZIP do wydania
+        uses: softprops/action-gh-release@v2
+        with:
+          files: custom_components/inpost_konto/inpost_konto.zip
