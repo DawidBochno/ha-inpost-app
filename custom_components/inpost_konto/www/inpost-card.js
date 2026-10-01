@@ -110,7 +110,22 @@ class InpostCard extends HTMLElement {
 
 // Gwardia na `typeof`: ten sam plik jest wczytywany przez test w node,
 // gdzie ani customElements, ani window nie istnieja.
-if (typeof customElements !== "undefined") customElements.define("inpost-card", InpostCard);
+// Karta laduje sie przez add_extra_js_url, czyli PRZED zasobami Lovelace. Czesc kart
+// z HACS (np. mini-graph-card, stack-in-card) wozi polyfill "scoped custom element
+// registry", ktory podmienia window.customElements na nowy rejestr - i ten nie zna
+// elementow zdefiniowanych wczesniej. HA widzi wtedy "Custom element doesn't exist".
+// Ponowne define() w podmienionym rejestrze przyjmuje nasza klase i HA sam przebudowuje karte.
+function zarejestruj() {
+  if (typeof customElements !== "undefined" && !customElements.get("inpost-card")) {
+    customElements.define("inpost-card", InpostCard);
+  }
+}
+zarejestruj();
+if (typeof window !== "undefined") {
+  // ponytail: sprawdzanie przez 30 s po starcie; polyfill doladowany pozniej znow by zgubil karte
+  let proby = 0;
+  const t = setInterval(() => { zarejestruj(); if (++proby >= 30) clearInterval(t); }, 1000);
+}
 
 if (typeof window !== "undefined") {
 window.customCards = window.customCards || [];
