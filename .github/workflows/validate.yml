@@ -35,4 +35,5 @@ jobs:
         with:
           python-version: "3.13"
       - run: python tests/test_parcels.py
+      - run: python tests/test_login.py
       - run: node tests/test_card.cjs

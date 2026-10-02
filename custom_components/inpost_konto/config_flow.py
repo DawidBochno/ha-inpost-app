@@ -57,9 +57,21 @@ class InPostConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     def __init__(self) -> None:
-        self._login = InPostLogin()
+        # Wszystkie linki pokazane w tym oknie zostaja wazne: logowanie w przegladarce
+        # trwa (SMS, potem e-mail), a w miedzyczasie formularz mogl dostac nowy link.
+        self._logins = [InPostLogin()]
         # Jeden device-uid na wpis, staly: API wiaze z nim sesje.
         self._device_uid = str(uuid.uuid4())
+
+    def _match(self, pasted: str) -> tuple[InPostLogin, str]:
+        """Znajdz probe logowania, z ktorej pochodzi wklejony adres."""
+        for login in reversed(self._logins):
+            try:
+                return login, login.extract_code(pasted)
+            except ValueError as err:
+                if str(err) != "state":
+                    raise
+        raise ValueError("state")
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -68,13 +80,13 @@ class InPostConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
-                code = self._login.extract_code(user_input[CONF_CALLBACK])
-            except ValueError:
-                errors["base"] = "invalid_callback"
+                login, code = self._match(user_input[CONF_CALLBACK])
+            except ValueError as err:
+                errors["base"] = "sms_code" if str(err) == "sms" else "invalid_callback"
             else:
                 session = async_get_clientsession(self.hass)
                 try:
-                    tokens = await self._login.async_exchange(
+                    tokens = await login.async_exchange(
                         session, self._device_uid, code
                     )
                     api = InPostApi(session, self._device_uid, tokens)
@@ -101,14 +113,15 @@ class InPostConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title=f"InPost {phone or ''}".strip(), data=data
                     )
-            # Kod jednorazowy jest spalony — nastepna proba potrzebuje nowego linku.
-            self._login = InPostLogin()
+                # Kod jednorazowy jest spalony — nastepna proba potrzebuje nowego linku.
+                # (Przy zlym wklejeniu nic nie spalono, wiec link zostaje ten sam.)
+                self._logins.append(InPostLogin())
 
         return self.async_show_form(
             step_id="user",
             data_schema=STEP_SCHEMA,
             errors=errors,
-            description_placeholders={"login_url": self._login.url},
+            description_placeholders={"login_url": self._logins[-1].url},
         )
 
     async def async_step_reauth(

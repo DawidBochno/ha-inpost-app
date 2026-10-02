@@ -3,21 +3,22 @@
     "step": {
       "user": {
         "title": "Logowanie do konta InPost",
-        "description": "1. Otwórz [ten link]({login_url}) w przeglądarce i zaloguj się tak jak w aplikacji InPost Mobile (numer telefonu, kod SMS, captcha).\n2. Po zalogowaniu przeglądarka wyląduje na stronie `account.inpost-group.com/callback?code=...` — może wyglądać na pustą lub błędną, to normalne.\n3. Skopiuj **cały adres z paska przeglądarki** i wklej go poniżej.\n\nLink jest jednorazowy: przy kolejnej próbie użyj nowego linku z tego okna.",
+        "description": "1. Otwórz [ten link]({login_url}) w przeglądarce i zaloguj się tak jak w aplikacji InPost Mobile (numer telefonu, kod SMS, captcha). **Kod SMS wpisujesz na stronie InPostu, nie tutaj.**\n2. Jeśli InPost poprosi o zalogowanie e-mailem („znamy się”), zrób to **w tej samej przeglądarce**. Gdy po tym wylądujesz na stronie konta InPost zamiast na adresie z `callback`, otwórz [ten link]({login_url}) jeszcze raz — będąc już zalogowanym, powinieneś od razu trafić na adres z kodem.\n3. Na końcu przeglądarka wyląduje na `account.inpost-group.com/callback?code=...` — strona może wyglądać na pustą lub błędną, to normalne. Skopiuj **cały adres z paska przeglądarki** i wklej go poniżej.",
         "data": {
-          "callback_url": "Adres zwrotny (albo sam kod)"
+          "callback_url": "Adres zwrotny (cały adres z paska przeglądarki)"
         }
       },
       "reauth_confirm": {
         "title": "Zaloguj się ponownie do InPost",
         "description": "Sesja wygasła lub została unieważniona (np. wylogowanie w aplikacji). Zaloguj się ponownie: otwórz [ten link]({login_url}), zaloguj się i wklej poniżej adres, na którym wyląduje przeglądarka.",
         "data": {
-          "callback_url": "Adres zwrotny (albo sam kod)"
+          "callback_url": "Adres zwrotny (cały adres z paska przeglądarki)"
         }
       }
     },
     "error": {
-      "invalid_callback": "Nie znalazłem kodu w tym adresie (albo pochodzi on z innej próby logowania). Użyj linku z tego okna i wklej cały adres.",
+      "sms_code": "To wygląda na kod SMS — wpisz go na stronie InPostu, nie tutaj. W tym polu wklej adres `account.inpost-group.com/callback?code=...`, na którym przeglądarka wyląduje po zalogowaniu.",
+      "invalid_callback": "Ten adres nie pasuje do żadnego linku z tego okna — InPost bywa zalogowany ze starszej próby i odsyła jej kod. Otwórz link z tego okna w **oknie prywatnym (incognito)**, zaloguj się i wklej cały adres `.../callback?code=...`.",
       "invalid_auth": "InPost odrzucił ten kod. Kod jest jednorazowy i szybko wygasa — zaloguj się jeszcze raz przez nowy link.",
       "cannot_connect": "Brak połączenia z API InPostu. Spróbuj ponownie za chwilę."
     },

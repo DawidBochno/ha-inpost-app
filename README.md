@@ -43,12 +43,19 @@ padają co kilka dni.
 ## Logowanie
 
 1. Kliknij link pokazany w okienku konfiguracji — otworzy stronę logowania InPostu.
-2. Zaloguj się jak w apce: numer telefonu → kod SMS → captcha.
+2. Zaloguj się jak w apce: numer telefonu → kod SMS → captcha. Kod SMS wpisujesz na stronie
+   InPostu — **nie** w HA. Jeśli InPost poprosi o logowanie e-mailem („znamy się”), zrób to
+   w tej samej przeglądarce; gdy potem trafisz na stronę konta zamiast na `callback`, kliknij
+   link z okienka HA jeszcze raz — będąc zalogowanym, powinieneś od razu dostać adres z kodem.
 3. Przeglądarka wyląduje na `https://account.inpost-group.com/callback?code=...`. Strona
    może wyglądać na pustą lub błędną — to normalne, liczy się adres.
 4. Skopiuj **cały adres z paska** i wklej w HA.
 
-Link i kod są jednorazowe. Jeśli się nie udało — wróć do okienka, weź nowy link.
+Kod w adresie jest jednorazowy. Wszystkie linki pokazane w tym samym okienku pozostają ważne,
+więc logowanie rozpoczęte wcześniejszym linkiem też da się dokończyć.
+
+**„Nie znalazłem kodu w tym adresie"** mimo poprawnego `callback?code=...`: InPost pamięta w przeglądarce
+starszą próbę logowania i odsyła jej kod (inny `state` w adresie niż w linku). Otwórz link w oknie prywatnym (incognito).
 
 ## Co dostajesz
 
@@ -180,6 +187,7 @@ automation:
 
 ```bash
 python tests/test_parcels.py
+python tests/test_login.py
 node tests/test_card.cjs
 ```
 

@@ -80,13 +80,15 @@ class InPostLogin:
         return f"{OAUTH_AUTHORIZE_URL}?{urlencode(params)}"
 
     def extract_code(self, pasted: str) -> str:
-        """Wyciagnij `code` z wklejonego adresu zwrotnego (albo z samego kodu)."""
+        """Wyciagnij `code` z wklejonego adresu zwrotnego.
+
+        ValueError("sms") — wklejono kod SMS, ValueError("state") — adres z innej
+        proby logowania, ValueError("brak kodu") — wszystko inne.
+        """
         value = pasted.strip()
         if "code=" not in value:
-            # Ktos wklejil sam kod, bez adresu.
-            if value and " " not in value and "/" not in value:
-                return value
-            raise ValueError("brak kodu")
+            # Kiedys przyjmowalismy tu "sam kod" — ludzie wklejali kod SMS (issue #1).
+            raise ValueError("sms" if value.replace(" ", "").isdigit() else "brak kodu")
         query = parse_qs(urlsplit(value).query or value)
         code = (query.get("code") or [""])[0]
         if not code:
@@ -94,7 +96,7 @@ class InPostLogin:
         state = (query.get("state") or [None])[0]
         if state is not None and state != self._state:
             # Adres z innej (starszej) proby logowania — kod i verifier sie rozjada.
-            raise ValueError("niezgodny state")
+            raise ValueError("state")
         return code
 
     async def async_exchange(
