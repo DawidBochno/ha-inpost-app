@@ -3,14 +3,14 @@
     "step": {
       "user": {
         "title": "Logowanie do konta InPost",
-        "description": "1. Otwórz [ten link]({login_url}) w przeglądarce i zaloguj się tak jak w aplikacji InPost Mobile (numer telefonu, kod SMS, captcha). **Kod SMS wpisujesz na stronie InPostu, nie tutaj.**\n2. Jeśli InPost poprosi o zalogowanie e-mailem („znamy się”), zrób to **w tej samej przeglądarce**. Gdy po tym wylądujesz na stronie konta InPost zamiast na adresie z `callback`, otwórz [ten link]({login_url}) jeszcze raz — będąc już zalogowanym, powinieneś od razu trafić na adres z kodem.\n3. Na końcu przeglądarka wyląduje na `account.inpost-group.com/callback?code=...` — strona może wyglądać na pustą lub błędną, to normalne. Skopiuj **cały adres z paska przeglądarki** i wklej go poniżej.",
+        "description": "1. Otwórz [ten link]({login_url}) w przeglądarce i zaloguj się tak jak w aplikacji InPost Mobile (numer telefonu, kod SMS, captcha). **Kod SMS wpisujesz na stronie InPostu, nie tutaj.**\n2. Jeśli InPost poprosi o zalogowanie e-mailem („znamy się”), zrób to **w tej samej przeglądarce**. Gdy po tym wylądujesz na stronie konta InPost zamiast na adresie z `callback`, otwórz [ten link]({login_url}) jeszcze raz — będąc już zalogowanym, powinieneś od razu trafić na adres z kodem.\n3. Na końcu przeglądarka wyląduje na `account.inpost-group.com/callback?code=...` — strona może wyglądać na pustą lub błędną, to normalne. Skopiuj **cały adres z paska przeglądarki** i wklej go poniżej.\n\n**Inne konto albo logowanie od nowa:** przeglądarka zalogowana już do InPostu od razu odeśle kod tamtego konta. Kliknij link prawym przyciskiem → *Kopiuj adres linku* i otwórz go w **oknie prywatnym** (Ctrl+Shift+N).",
         "data": {
           "callback_url": "Adres zwrotny (cały adres z paska przeglądarki)"
         }
       },
       "reauth_confirm": {
         "title": "Zaloguj się ponownie do InPost",
-        "description": "Sesja wygasła lub została unieważniona (np. wylogowanie w aplikacji). Zaloguj się ponownie: otwórz [ten link]({login_url}), zaloguj się i wklej poniżej adres, na którym wyląduje przeglądarka.",
+        "description": "Sesja wygasła lub została unieważniona (np. wylogowanie w aplikacji). Zaloguj się ponownie: otwórz [ten link]({login_url}), zaloguj się i wklej poniżej adres, na którym wyląduje przeglądarka.\n\n**Inne konto albo logowanie od nowa:** przeglądarka zalogowana już do InPostu od razu odeśle kod tamtego konta. Kliknij link prawym przyciskiem → *Kopiuj adres linku* i otwórz go w **oknie prywatnym** (Ctrl+Shift+N).",
         "data": {
           "callback_url": "Adres zwrotny (cały adres z paska przeglądarki)"
         }

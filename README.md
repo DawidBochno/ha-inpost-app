@@ -57,6 +57,28 @@ więc logowanie rozpoczęte wcześniejszym linkiem też da się dokończyć.
 **„Nie znalazłem kodu w tym adresie"** mimo poprawnego `callback?code=...`: InPost pamięta w przeglądarce
 starszą próbę logowania i odsyła jej kod (inny `state` w adresie niż w linku). Otwórz link w oknie prywatnym (incognito).
 
+### Logowanie od nowa albo na inne konto
+
+Jeśli przeglądarka jest już zalogowana do InPostu, link z HA nie zapyta o numer — od razu wróci
+z kodem **tego** konta. Żeby zalogować się od nowa (np. numerem telefonu albo na inne konto):
+
+**Okno prywatne (najprościej):**
+1. W okienku HA kliknij **prawym przyciskiem** na „ten link” → **Kopiuj adres linku**
+   (zwykłe kliknięcie otworzy go w normalnym oknie).
+2. Otwórz okno prywatne — **Ctrl+Shift+N** (Chrome, Edge, Opera), **Ctrl+Shift+P** (Firefox).
+3. Wklej link, zaloguj się, skopiuj adres `…/callback?code=…` **z tego okna** i wklej w HA.
+4. Zamknij okno prywatne — sesja InPostu zniknie razem z nim.
+
+**Albo wyczyść sesję w zwykłej przeglądarce:** wejdź na `https://account.inpost-group.com`,
+kliknij kłódkę przy adresie → **Ustawienia witryny / Pliki cookie i dane witryny** → **Usuń dane**,
+potem kliknij link z okienka HA jeszcze raz.
+
+Jeśli numer telefonu jest powiązany z kontem e-mail, InPost i tak może powiedzieć „znamy się” i poprosić
+o e-mail — dokończ wtedy logowanie e-mailem **w tym samym oknie**.
+
+Integracja obsługuje jedno konto na wpis. Drugie konto (np. domownika) dodajesz jako kolejny wpis:
+Ustawienia → Urządzenia i usługi → InPost App → **Dodaj wpis** — i logujesz się w oknie prywatnym jak wyżej.
+
 ## Co dostajesz
 
 Encje na urządzeniu „InPost +48…":
