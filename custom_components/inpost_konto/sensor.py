@@ -55,10 +55,14 @@ _SUMMARIES: tuple[tuple[str, str, str, Callable[[InPostData], int]], ...] = (
 
 def _compact(parcel: dict[str, Any]) -> dict[str, Any]:
     """Skrocony opis paczki na liste w atrybutach (bez historii zdarzen)."""
-    return {
+    short = {
         k: parcel.get(k)
         for k in ("numer", "status", "nadawca", "punkt", "adres", "termin_odbioru")
     }
+    # Klucz jest w paczce tylko przy wlaczonym "Publikuj kody" (parcels.py) — karta go wyswietla.
+    if "kod_odbioru" in parcel:
+        short["kod_odbioru"] = parcel["kod_odbioru"]
+    return short
 
 
 async def async_setup_entry(

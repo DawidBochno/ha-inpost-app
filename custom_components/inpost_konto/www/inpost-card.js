@@ -71,6 +71,8 @@ class InpostCard extends HTMLElement {
             const s = STATUSY[p.status] || STATUSY.nieznany;
             const punkt = p.punkt ? `${esc(p.punkt)}${p.adres ? ", " + esc(p.adres) : ""}` : null;
             const termin = p.termin_odbioru ? terminTekst(p.termin_odbioru) : null;
+            // Kod przychodzi tylko przy włączonej opcji "Publikuj kody otwarcia skrytki".
+            const kod = p.status === "do_odbioru" && p.kod_odbioru ? p.kod_odbioru : null;
             const przygaszone = p.status === "odebrana" ? "opacity:.6;" : "";
             return `
         <div style="display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--divider-color);${przygaszone}">
@@ -80,6 +82,7 @@ class InpostCard extends HTMLElement {
             ${punkt ? `<div style="font-size:13px;color:var(--secondary-text-color)">${punkt}</div>` : ""}
             ${termin ? `<div style="font-size:13px;color:var(--warning-color, #ffa600)">${esc(termin)}</div>` : ""}
           </div>
+          ${kod ? `<div style="text-align:right"><div style="font-size:11px;color:var(--secondary-text-color)">kod odbioru</div><div style="font-size:20px;font-weight:500;letter-spacing:2px;font-family:var(--code-font-family, monospace)">${esc(kod)}</div></div>` : ""}
         </div>`;
           })
           .join("")
@@ -138,4 +141,4 @@ window.customCards.push({
 });
 }
 
-if (typeof module !== "undefined") module.exports = { terminTekst, LICZNIKI, STATUSY, esc };
+if (typeof module !== "undefined") module.exports = { terminTekst, LICZNIKI, STATUSY, esc, InpostCard };

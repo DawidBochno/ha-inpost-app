@@ -35,4 +35,17 @@ assert.deepStrictEqual(liczby, [
   ["problemy", 1],
 ]);
 
+// Kod odbioru: tylko dla paczki czekajacej w paczkomacie i tylko gdy integracja go podala.
+const { InpostCard } = require("../custom_components/inpost_konto/www/inpost-card.js");
+const karta = new InpostCard();
+karta.setConfig({ entity: "sensor.inpost_paczki" });
+karta._render({ attributes: { paczki: [
+  { status: "do_odbioru", kod_odbioru: "123456" },
+  { status: "odebrana", kod_odbioru: "999999" },
+  { status: "do_odbioru" },
+] } });
+assert.ok(karta.innerHTML.includes("123456"), "kod paczki do odbioru ma byc widoczny");
+assert.ok(!karta.innerHTML.includes("999999"), "kod odebranej paczki jest juz bez znaczenia");
+assert.strictEqual(karta.innerHTML.split("kod odbioru").length - 1, 1, "bez kodu nie ma pustej ramki");
+
 console.log("OK — karta przeszla sprawdzenia");

@@ -100,8 +100,10 @@ nich, nie do surowych stringów InPostu (tych jest ~60 i dochodzą nowe).
 ## Opcje (⋮ → Konfiguruj)
 
 - **Częstotliwość odpytywania** — domyślnie 5 min.
-- **Publikuj kody otwarcia skrytki** — domyślnie **wyłączone**. Kod otwiera skrytkę, a stany
-  encji lądują w bazie recordera i we wszystkim, co ją czyta.
+- **Publikuj kody otwarcia skrytki** — domyślnie **wyłączone**. Po włączeniu kod jest
+  w atrybucie `kod_odbioru` encji paczki i w liście `paczki` liczników, a karta pokazuje go
+  przy paczce do odbioru. Kod otwiera skrytkę, a atrybuty encji lądują w bazie recordera
+  i we wszystkim, co ją czyta.
 - **Ile dni trzymać odebrane paczki** — domyślnie 7, `0` = usuwaj od razu. Bez tego lista
   rośnie bez końca. Uwaga: jeśli wszystkie Twoje paczki są odebrane i starsze niż ten próg,
   **wszystkie liczniki pokażą 0** — to nie awaria, tylko pusta skrzynka.
@@ -119,7 +121,8 @@ Integracja wozi własną kartę Lovelace, więc **nic nie trzeba wklejać ani re
 3. Dodaj. Karta sama znajduje właściwą encję, więc działa od razu, bez konfiguracji.
 
 Pokazuje cztery liczniki (do odbioru / w drodze / wszystkie / problemy), a pod nimi listę
-paczek: nadawca, status, paczkomat z adresem i odliczanie do terminu odbioru. Wiersze
+paczek: nadawca, status, paczkomat z adresem, odliczanie do terminu odbioru i — przy włączonej
+opcji „Publikuj kody” — kod odbioru paczki czekającej w paczkomacie. Wiersze
 odebranych paczek są przygaszone.
 
 Opcjonalnie:
