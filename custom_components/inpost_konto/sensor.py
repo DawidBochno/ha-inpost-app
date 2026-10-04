@@ -24,7 +24,7 @@ from .const import (
     ST_PROBLEM,
 )
 from .coordinator import InPostCoordinator, InPostData
-from .parcels import parse_dt
+from .parcels import compact_parcel, parse_dt
 
 # Statusy skladajace sie na "w drodze" na dashboardzie.
 _ON_THE_WAY = (ST_REGISTERED, ST_IN_TRANSIT, ST_OUT_FOR_DELIVERY)
@@ -51,18 +51,6 @@ _SUMMARIES: tuple[tuple[str, str, str, Callable[[InPostData], int]], ...] = (
         lambda d: sum(p["status"] in (ST_PROBLEM, ST_RETURNING) for p in d.parcels),
     ),
 )
-
-
-def _compact(parcel: dict[str, Any]) -> dict[str, Any]:
-    """Skrocony opis paczki na liste w atrybutach (bez historii zdarzen)."""
-    short = {
-        k: parcel.get(k)
-        for k in ("numer", "status", "nadawca", "punkt", "adres", "termin_odbioru")
-    }
-    # Klucz jest w paczce tylko przy wlaczonym "Publikuj kody" (parcels.py) — karta go wyswietla.
-    if "kod_odbioru" in parcel:
-        short["kod_odbioru"] = parcel["kod_odbioru"]
-    return short
 
 
 async def async_setup_entry(
@@ -140,7 +128,7 @@ class InPostSummarySensor(InPostEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        return {"paczki": [_compact(p) for p in self.coordinator.data.parcels]}
+        return {"paczki": [compact_parcel(p) for p in self.coordinator.data.parcels]}
 
 
 class InPostNextExpirySensor(InPostEntity):

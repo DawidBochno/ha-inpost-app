@@ -1,4 +1,4 @@
-"""Jedyny sprawdzacz: mapowanie statusow i sprzatanie odebranych.
+"""Mapowanie statusow, sprzatanie odebranych i ukrywanie kodu odbioru.
 
 Bez pytesta i bez HA — `python tests/test_parcels.py` z katalogu repo.
 Reszta integracji to klej HA; to tutaj jest logika, ktora moze sie zepsuc cicho.
@@ -22,9 +22,11 @@ ST_DELIVERED = _const.ST_DELIVERED
 ST_PROBLEM = _const.ST_PROBLEM
 ST_READY = _const.ST_READY
 ST_UNKNOWN = _const.ST_UNKNOWN
+compact_parcel = _parcels.compact_parcel
 drop_old_delivered = _parcels.drop_old_delivered
 map_status = _parcels.map_status
 normalize_all = _parcels.normalize_all
+normalize_parcel = _parcels.normalize_parcel
 parse_dt = _parcels.parse_dt
 
 NOW = datetime(2026, 9, 27, 12, 0, tzinfo=timezone.utc)
@@ -140,9 +142,20 @@ def test_parse_dt() -> None:
     assert parse_dt(None) is None
 
 
+def test_pickup_code() -> None:
+    """Kod otwiera skrytke: bez zgody nie moze trafic ani do paczki, ani do listy w licznikach."""
+    raw = {"shipmentNumber": "1", "status": "ready_to_pickup", "openCode": "123456"}
+    hidden = normalize_parcel(raw, show_codes=False)
+    shown = normalize_parcel(raw, show_codes=True)
+    assert "kod_odbioru" not in hidden and "kod_odbioru" not in compact_parcel(hidden)
+    assert shown["kod_odbioru"] == "123456"
+    assert compact_parcel(shown)["kod_odbioru"] == "123456", "karta czyta kod z listy w licznikach"
+
+
 if __name__ == "__main__":
     test_map_status()
     test_normalize()
     test_drop_old_delivered()
     test_parse_dt()
+    test_pickup_code()
     print("OK — wszystkie sprawdzenia przeszly")

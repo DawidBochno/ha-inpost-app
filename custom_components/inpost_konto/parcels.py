@@ -148,6 +148,18 @@ def normalize_parcel(raw: dict[str, Any], *, show_codes: bool) -> dict[str, Any]
     return parcel
 
 
+def compact_parcel(parcel: dict[str, Any]) -> dict[str, Any]:
+    """Skrocony opis paczki na liste w atrybutach licznikow (bez historii zdarzen)."""
+    short = {
+        k: parcel.get(k)
+        for k in ("numer", "status", "nadawca", "punkt", "adres", "termin_odbioru")
+    }
+    # Klucz jest w paczce tylko przy wlaczonym "Publikuj kody" (normalize_parcel) — karta go wyswietla.
+    if "kod_odbioru" in parcel:
+        short["kod_odbioru"] = parcel["kod_odbioru"]
+    return short
+
+
 def normalize_all(payload: Any, *, show_codes: bool) -> list[dict[str, Any]]:
     """Cala odpowiedz /parcels/tracked -> lista znormalizowanych paczek."""
     if isinstance(payload, dict):

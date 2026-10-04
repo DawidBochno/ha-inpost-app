@@ -216,6 +216,8 @@ python tests/test_login.py
 node tests/test_card.cjs
 ```
 
-Pierwszy sprawdza mapowanie statusów, normalizację paczki i sprzątanie odebranych; drugi —
-odliczanie do terminu odbioru i kubełki liczników w karcie. Czyli te części, które mogą się
+Pierwszy sprawdza mapowanie statusów, normalizację paczki, sprzątanie odebranych i to, że kod
+odbioru nie wycieka przy wyłączonej opcji; drugi — wklejanie adresu zwrotnego przy logowaniu
+(kod SMS, adres z innej próby); trzeci — odliczanie do terminu odbioru, kubełki liczników
+i kod odbioru w karcie. Czyli te części, które mogą się
 zepsuć po cichu. Ani HA, ani pytesta, ani przeglądarki.
