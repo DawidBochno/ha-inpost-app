@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 DOMAIN = "inpost_konto"
-VERSION = "0.2.6"  # trzymaj zgodnie z manifest.json — leci do URL-a karty jako cache-buster
+VERSION = "0.2.7"  # trzymaj zgodnie z manifest.json — leci do URL-a karty jako cache-buster
 
 # Własna karta Lovelace serwowana przez integrację: dzięki niej karta jest do
 # wybrania z listy „Dodaj kartę", bez wklejania YAML-a i bez dodawania zasobu ręcznie.
@@ -85,7 +85,9 @@ STATUS_MAP: dict[str, str] = {
     "stack_in_box_machine": ST_READY,
     "stack_in_customer_service_point": ST_READY,
     "pickup_reminder_sent": ST_READY,
-    "pickup_reminder_sent_address": ST_READY,
+    # Kurier nie zastal adresata (zdarzenie LMD.9004 "Nieudana proba doreczenia"), grupa IN_DELIVERY.
+    # Paczka NIE lezy w paczkomacie — wczesniej trafiala do "do odbioru" bez punktu i kodu.
+    "pickup_reminder_sent_address": ST_PROBLEM,
     "delivered": ST_DELIVERED,
     "collected_by_customer": ST_DELIVERED,
     "claimed": ST_DELIVERED,

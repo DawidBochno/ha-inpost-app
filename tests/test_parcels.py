@@ -39,6 +39,9 @@ def test_map_status() -> None:
     assert map_status("cos_nowego_2027", "TO_PICKUP") == ST_READY
     assert map_status("cos_nowego_2027", "COS_NOWEGO") == ST_UNKNOWN
     assert map_status("pickup_time_expired", None) == ST_PROBLEM
+    # Regres 2026-10-06: kurierska paczka Amazon po nieudanym doreczeniu wisiala jako "do odbioru".
+    assert map_status("PICKUP_REMINDER_SENT_ADDRESS", "IN_DELIVERY") == ST_PROBLEM
+    assert map_status("PICKUP_REMINDER_SENT", "TO_PICKUP") == ST_READY, "przypomnienie z paczkomatu zostaje"
 
 
 def test_normalize() -> None:
