@@ -112,9 +112,9 @@ nich, nie do surowych stringów InPostu (tych jest ~60 i dochodzą nowe).
 
 ## Karta na panelu
 
-<img src="docs/karta.svg" width="560" alt="Karta InPost: liczniki paczek i lista przesylek z paczkomatem i terminem odbioru">
+<img src="docs/karta.svg" width="560" alt="Karta InPost: liczniki paczek, paczka w paczkomacie z terminem, kodem odbioru i kodem QR">
 
-<sup>Podglad karty na przykladowych danych — konto z paczka czekajaca w paczkomacie.</sup>
+<sup>Podgląd karty na przykładowych danych — paczka czekająca w paczkomacie, z włączonym „Publikuj kody” (QR zakodowany z fikcyjnym numerem).</sup>
 
 Integracja wozi własną kartę Lovelace, więc **nic nie trzeba wklejać ani rejestrować**:
 
@@ -126,6 +126,11 @@ Pokazuje cztery liczniki (do odbioru / w drodze / wszystkie / problemy), a pod n
 paczek: nadawca, status, paczkomat z adresem, odliczanie do terminu odbioru i — przy włączonej
 opcji „Publikuj kody” — kod odbioru i kod QR paczki czekającej w paczkomacie. Wiersze
 odebranych paczek są przygaszone.
+
+**Kod odbioru i QR na karcie** (domyślnie ukryte): Ustawienia → Urządzenia i usługi →
+InPost App → ⚙️ **Konfiguruj** → zaznacz **„Publikuj kody otwarcia skrytki”**. Przy paczce
+„do odbioru” pojawi się 6-cyfrowy kod, a pod nią QR — w paczkomacie wybierz skanowanie
+i przyłóż ekran telefonu.
 
 Opcjonalnie:
 
