@@ -32,6 +32,99 @@ function terminTekst(iso) {
   return `odbierz do ${data} — ${ile}`;
 }
 
+// Kod QR rysowany lokalnie: tresc otwiera skrytke, wiec nie wysylamy jej do zadnego serwisu.
+// Tryb bajtowy, korekcja M, wersje 1–6 (do ~100 znakow). Algorytm wg ISO 18004 (jak u Nayuki).
+// ponytail: stala maska 0 zamiast wyboru najlepszej — czytniki odczytuja maske z pola formatu.
+const QR_ECC = [0, 10, 16, 26, 18, 24, 16]; // bajty korekcji na blok, poziom M
+const QR_BLOKI = [0, 1, 1, 1, 2, 2, 4];
+
+function qrMacierz(tekst) {
+  const dane = [...new TextEncoder().encode(tekst)];
+  const surowe = (v) => (16 * v + 128) * v + 64 - (v >= 2 ? (25 * (Math.floor(v / 7) + 2) - 10) * (Math.floor(v / 7) + 2) - 55 : 0);
+  let v = 1;
+  while (v <= 6 && Math.floor(surowe(v) / 8) - QR_ECC[v] * QR_BLOKI[v] < dane.length + 2) v++;
+  if (v > 6) return null;
+  const pojemnosc = Math.floor(surowe(v) / 8) - QR_ECC[v] * QR_BLOKI[v];
+
+  // Bity: tryb 0100, dlugosc na 8 bitach, dane, terminator, dopelnienie.
+  const bity = [];
+  const dopisz = (wart, ile) => { for (let i = ile - 1; i >= 0; i--) bity.push((wart >>> i) & 1); };
+  dopisz(4, 4); dopisz(dane.length, 8); dane.forEach((b) => dopisz(b, 8));
+  dopisz(0, Math.min(4, pojemnosc * 8 - bity.length));
+  dopisz(0, (8 - (bity.length % 8)) % 8);
+  const slowa = [];
+  for (let i = 0; i < bity.length; i += 8) slowa.push(parseInt(bity.slice(i, i + 8).join(""), 2));
+  for (let pad = 0xec; slowa.length < pojemnosc; pad ^= 0xec ^ 0x11) slowa.push(pad);
+
+  // Reed-Solomon w GF(256) i przeplot blokow.
+  const mnoz = (x, y) => { let z = 0; for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11d); z ^= ((y >>> i) & 1) * x; } return z; };
+  const st = QR_ECC[v];
+  const dzielnik = Array(st).fill(0); dzielnik[st - 1] = 1;
+  for (let i = 0, r = 1; i < st; i++, r = mnoz(r, 2)) {
+    for (let j = 0; j < st; j++) { dzielnik[j] = mnoz(dzielnik[j], r); if (j + 1 < st) dzielnik[j] ^= dzielnik[j + 1]; }
+  }
+  const reszta = (d) => { const w = Array(st).fill(0); for (const b of d) { const f = b ^ w.shift(); w.push(0); dzielnik.forEach((c, i) => (w[i] ^= mnoz(c, f))); } return w; };
+  const nb = QR_BLOKI[v], wszystkie = Math.floor(surowe(v) / 8), krotkie = nb - (wszystkie % nb), dl = Math.floor(wszystkie / nb);
+  const bloki = [];
+  for (let i = 0, k = 0; i < nb; i++) {
+    const d = slowa.slice(k, (k += dl - st + (i < krotkie ? 0 : 1)));
+    const ecc = reszta(d);
+    if (i < krotkie) d.push(0);
+    bloki.push(d.concat(ecc));
+  }
+  const wynik = [];
+  for (let i = 0; i < bloki[0].length; i++) bloki.forEach((b, j) => { if (i !== dl - st || j >= krotkie) wynik.push(b[i]); });
+
+  // Wzory stale: wyszukiwania, synchronizacji, wyrownania, ciemny modul.
+  const n = 17 + 4 * v;
+  const m = Array.from({ length: n }, () => Array(n).fill(false));
+  const stale = Array.from({ length: n }, () => Array(n).fill(false));
+  const ustaw = (x, y, c) => { m[y][x] = c; stale[y][x] = true; };
+  for (let i = 0; i < n; i++) { ustaw(6, i, i % 2 === 0); ustaw(i, 6, i % 2 === 0); }
+  for (const [cx, cy] of [[3, 3], [n - 4, 3], [3, n - 4]]) {
+    for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+      const odl = Math.max(Math.abs(dx), Math.abs(dy)), x = cx + dx, y = cy + dy;
+      if (x >= 0 && x < n && y >= 0 && y < n) ustaw(x, y, odl !== 2 && odl !== 4);
+    }
+  }
+  if (v >= 2) {
+    const p = n - 7; // dla wersji 2–6 jest tylko jeden wzor wyrownania
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) ustaw(p + dx, p + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+  }
+  // Pole formatu: poziom M (00) + maska 0 = same zera, wiec BCH tez 0 i zostaje tylko XOR 0x5412.
+  const fmt = 0x5412;
+  const bit = (i) => ((fmt >>> i) & 1) === 1;
+  for (let i = 0; i <= 5; i++) ustaw(8, i, bit(i));
+  ustaw(8, 7, bit(6)); ustaw(8, 8, bit(7)); ustaw(7, 8, bit(8));
+  for (let i = 9; i < 15; i++) ustaw(14 - i, 8, bit(i));
+  for (let i = 0; i < 8; i++) ustaw(n - 1 - i, 8, bit(i));
+  for (let i = 8; i < 15; i++) ustaw(8, n - 15 + i, bit(i));
+  ustaw(8, n - 8, true);
+
+  // Dane zygzakiem od prawego dolnego rogu, z maska 0: (x + y) % 2 == 0.
+  let i = 0;
+  for (let prawa = n - 1; prawa >= 1; prawa -= 2) {
+    if (prawa === 6) prawa = 5;
+    for (let pion = 0; pion < n; pion++) for (let j = 0; j < 2; j++) {
+      const x = prawa - j, y = ((prawa + 1) & 2) === 0 ? n - 1 - pion : pion;
+      if (stale[y][x]) continue;
+      const b = i < wynik.length * 8 ? ((wynik[i >>> 3] >>> (7 - (i & 7))) & 1) === 1 : false;
+      i++;
+      m[y][x] = b !== ((x + y) % 2 === 0);
+    }
+  }
+  return m;
+}
+
+function qrSvg(tekst) {
+  const m = qrMacierz(tekst);
+  if (!m) return "";
+  const n = m.length, r = 4; // margines 4 moduly — wymog czytnikow
+  let d = "";
+  m.forEach((wiersz, y) => wiersz.forEach((c, x) => { if (c) d += `M${x + r},${y + r}h1v1h-1z`; }));
+  return `<svg viewBox="0 0 ${n + 2 * r} ${n + 2 * r}" shape-rendering="crispEdges" style="width:100%;height:100%;background:#fff;border-radius:6px"><path d="${d}" fill="#000"/></svg>`;
+}
+
 class InpostCard extends HTMLElement {
   setConfig(config) {
     if (!config.entity) throw new Error("Wskaż encję licznika paczek, np. sensor.inpost_paczki");
@@ -73,6 +166,8 @@ class InpostCard extends HTMLElement {
             const termin = p.termin_odbioru ? terminTekst(p.termin_odbioru) : null;
             // Kod przychodzi tylko przy włączonej opcji "Publikuj kody otwarcia skrytki".
             const kod = p.status === "do_odbioru" && p.kod_odbioru ? p.kod_odbioru : null;
+            // QR z API (pole qrCode) — paczkomat skanuje go z ekranu zamiast wpisywania kodu.
+            const qr = p.status === "do_odbioru" && p.kod_qr ? qrSvg(p.kod_qr) : "";
             const przygaszone = p.status === "odebrana" ? "opacity:.6;" : "";
             return `
         <div style="display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--divider-color);${przygaszone}">
@@ -81,6 +176,7 @@ class InpostCard extends HTMLElement {
             <div>${esc(p.nadawca || "Nieznany nadawca")} · <span style="color:${s.kolor}">${s.etykieta}</span></div>
             ${punkt ? `<div style="font-size:13px;color:var(--secondary-text-color)">${punkt}</div>` : ""}
             ${termin ? `<div style="font-size:13px;color:var(--warning-color, #ffa600)">${esc(termin)}</div>` : ""}
+            ${qr ? `<div style="width:180px;max-width:100%;aspect-ratio:1;margin-top:10px">${qr}</div>` : ""}
           </div>
           ${kod ? `<div style="text-align:right"><div style="font-size:11px;color:var(--secondary-text-color)">kod odbioru</div><div style="font-size:20px;font-weight:500;letter-spacing:2px;font-family:var(--code-font-family, monospace)">${esc(kod)}</div></div>` : ""}
         </div>`;
@@ -141,4 +237,4 @@ window.customCards.push({
 });
 }
 
-if (typeof module !== "undefined") module.exports = { terminTekst, LICZNIKI, STATUSY, esc, InpostCard };
+if (typeof module !== "undefined") module.exports = { terminTekst, LICZNIKI, STATUSY, esc, InpostCard, qrMacierz, qrSvg };

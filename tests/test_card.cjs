@@ -40,12 +40,23 @@ const { InpostCard } = require("../custom_components/inpost_konto/www/inpost-car
 const karta = new InpostCard();
 karta.setConfig({ entity: "sensor.inpost_paczki" });
 karta._render({ attributes: { paczki: [
-  { status: "do_odbioru", kod_odbioru: "123456" },
-  { status: "odebrana", kod_odbioru: "999999" },
+  { status: "do_odbioru", kod_odbioru: "123456", kod_qr: "P|48500100200|123456" },
+  { status: "odebrana", kod_odbioru: "999999", kod_qr: "P|48500100200|999999" },
   { status: "do_odbioru" },
 ] } });
 assert.ok(karta.innerHTML.includes("123456"), "kod paczki do odbioru ma byc widoczny");
 assert.ok(!karta.innerHTML.includes("999999"), "kod odebranej paczki jest juz bez znaczenia");
 assert.strictEqual(karta.innerHTML.split("kod odbioru").length - 1, 1, "bez kodu nie ma pustej ramki");
+
+assert.strictEqual(karta.innerHTML.split("<svg").length - 1, 1, "QR tylko przy paczce do odbioru");
+
+// QR: wersja rosnie z dlugoscia, za dlugi tekst nie wysypuje karty. Poprawnosc samego kodu
+// sprawdzona dekoderem OpenCV przy pisaniu (wersje 1-6), tu pilnujemy tylko wzorow stalych.
+const { qrMacierz } = require("../custom_components/inpost_konto/www/inpost-card.js");
+const m = qrMacierz("P|48500100200|123456");
+assert.strictEqual(m.length, 25, "20 znakow przy korekcji M to wersja 2");
+assert.ok(m[0][0] && m[0][6] && !m[1][1] && m[3][3], "wzor wyszukiwania w lewym gornym rogu");
+assert.ok(m[m.length - 8][8], "ciemny modul");
+assert.strictEqual(qrMacierz("x".repeat(200)), null, "za dlugi tekst -> brak QR, nie wyjatek");
 
 console.log("OK — karta przeszla sprawdzenia");

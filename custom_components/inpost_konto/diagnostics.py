@@ -16,6 +16,7 @@ TO_REDACT = {
     "device_uid",
     "phone",
     "kod_odbioru",
+    "kod_qr",
     "openCode",
     "qrCode",
     "sender",

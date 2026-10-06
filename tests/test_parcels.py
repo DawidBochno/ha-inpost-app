@@ -144,10 +144,12 @@ def test_parse_dt() -> None:
 
 def test_pickup_code() -> None:
     """Kod otwiera skrytke: bez zgody nie moze trafic ani do paczki, ani do listy w licznikach."""
-    raw = {"shipmentNumber": "1", "status": "ready_to_pickup", "openCode": "123456"}
+    raw = {"shipmentNumber": "1", "status": "ready_to_pickup", "openCode": "123456", "qrCode": "P|48500100200|123456"}
     hidden = normalize_parcel(raw, show_codes=False)
     shown = normalize_parcel(raw, show_codes=True)
-    assert "kod_odbioru" not in hidden and "kod_odbioru" not in compact_parcel(hidden)
+    for key in ("kod_odbioru", "kod_qr"):
+        assert key not in hidden and key not in compact_parcel(hidden)
+    assert compact_parcel(shown)["kod_qr"] == "P|48500100200|123456"
     assert shown["kod_odbioru"] == "123456"
     assert compact_parcel(shown)["kod_odbioru"] == "123456", "karta czyta kod z listy w licznikach"
 

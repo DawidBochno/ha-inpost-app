@@ -145,6 +145,8 @@ def normalize_parcel(raw: dict[str, Any], *, show_codes: bool) -> dict[str, Any]
     if show_codes:
         # Kod otwiera skrytke — publikowany tylko na wyrazne zyczenie.
         parcel["kod_odbioru"] = raw.get("openCode")
+        # Tresc kodu QR, ktory paczkomat skanuje z ekranu telefonu — karta rysuje go sama.
+        parcel["kod_qr"] = raw.get("qrCode")
     return parcel
 
 
@@ -155,8 +157,9 @@ def compact_parcel(parcel: dict[str, Any]) -> dict[str, Any]:
         for k in ("numer", "status", "nadawca", "punkt", "adres", "termin_odbioru")
     }
     # Klucz jest w paczce tylko przy wlaczonym "Publikuj kody" (normalize_parcel) — karta go wyswietla.
-    if "kod_odbioru" in parcel:
-        short["kod_odbioru"] = parcel["kod_odbioru"]
+    for key in ("kod_odbioru", "kod_qr"):
+        if key in parcel:
+            short[key] = parcel[key]
     return short
 
 
