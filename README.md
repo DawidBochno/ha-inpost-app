@@ -74,7 +74,11 @@ kliknij kłódkę przy adresie → **Ustawienia witryny / Pliki cookie i dane wi
 potem kliknij link z okienka HA jeszcze raz.
 
 Jeśli numer telefonu jest powiązany z kontem e-mail, InPost i tak może powiedzieć „znamy się” i poprosić
-o e-mail — dokończ wtedy logowanie e-mailem **w tym samym oknie**.
+o e-mail — dokończ wtedy logowanie e-mailem **w tym samym oknie**. Gdy link z maila otworzy się
+w nowej karcie, po komunikacie o udanym logowaniu **wróć do pierwszej karty**. Jeśli pokaże formularz
+danych konta (jak przy zakładaniu), zatwierdź go przyciskiem na dole, niczego nie wpisując — dopiero
+wtedy pojawi się adres `…/callback?code=…` do wklejenia w HA (za
+[#1](https://github.com/DawidBochno/ha-inpost-app/issues/1)).
 
 Integracja obsługuje jedno konto na wpis. Drugie konto (np. domownika) dodajesz jako kolejny wpis:
 Ustawienia → Urządzenia i usługi → InPost App → **Dodaj wpis** — i logujesz się w oknie prywatnym jak wyżej.
